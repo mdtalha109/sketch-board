@@ -24,19 +24,16 @@ const Board = () => {
       anchor.href = URL
       anchor.download = 'sketch.jpg'
       anchor.click()
-    } 
-    else if (actionMenuItem === MENU_ITEMS.UNDO) {
-      if (historyPointer.current > 0) historyPointer.current -= 1
+    }
+    else if (actionMenuItem === MENU_ITEMS.UNDO || actionMenuItem === MENU_ITEMS.REDO) {
+
+      if (historyPointer.current > 0 && actionMenuItem === MENU_ITEMS.UNDO) historyPointer.current -= 1
+      if (historyPointer.current < drawHistory.current.length - 1 && actionMenuItem === MENU_ITEMS.REDO) historyPointer.current += 1
       const imageData = drawHistory.current[historyPointer.current]
       context.putImageData(imageData, 0, 0)
-      dispatch(actionItemClick(null))
-    } 
-    else if (actionMenuItem === MENU_ITEMS.REDO) {
-      if (historyPointer.current < drawHistory.current.length - 1 ) historyPointer.current += 1
-      const imageData = drawHistory.current[historyPointer.current]
-      context.putImageData(imageData, 0, 0)
-      dispatch(actionItemClick(null))
-    } 
+
+    }
+    dispatch(actionItemClick(null))
   }, [actionMenuItem])
 
   useEffect(() => {
@@ -61,21 +58,32 @@ const Board = () => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight
 
-
-    const handleMouseDown = (e) => {
-      shouldDraw.current = true
+    const beginPath = (x, y) => {
       context.beginPath()
-      context.moveTo(e.clientX, e.clientY)
-
+      context.moveTo(x, y)
     }
 
-    const handleMouseMove = (e) => {
-      if (!shouldDraw.current) return
-      context.lineTo(e.clientX, e.clientY)
+    const drawLine = (x, y) => {
+      context.lineTo(x, y)
       context.stroke()
     }
 
+
+    const handleMouseDown = (e) => {
+      shouldDraw.current = true
+      beginPath(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY)
+      context.moveTo(e.clientX, e.clientY)
+    }
+
+    const handleMouseMove = (e) => {
+      if (!shouldDraw.current) {
+        return
+      }
+      drawLine(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY)
+    }
+
     const handleMouseUp = (e) => {
+
       shouldDraw.current = false
       const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
       drawHistory.current.push(imageData)
@@ -93,8 +101,6 @@ const Board = () => {
     }
 
   }, [])
-
-  console.log(color, size)
 
   return (
     <canvas ref={canvasRef}></canvas>
