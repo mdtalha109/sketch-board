@@ -9,6 +9,8 @@ const COLORS = {
 }
 
 const MENU_ITEMS = {
+    SQUARE: 'SQUARE',
+    CIRCLE: 'CIRCLE',
     PENCIL: 'PENCIL',
     ERASER: 'ERASER',
     UNDO: 'UNDO',
@@ -16,4 +18,9 @@ const MENU_ITEMS = {
     DOWNLOAD: 'DOWNLOAD'
 }
 
-export {COLORS, MENU_ITEMS}
+const VIEW_CONTROL = {
+    ZOOM: 'ZOOM',
+    PAN: 'PAN'
+}
+
+export {COLORS, MENU_ITEMS, VIEW_CONTROL}
