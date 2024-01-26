@@ -189,7 +189,61 @@ const Board = () => {
     
       }
     }
-    
+    else if(activeMenuItem == 'CIRCLE'){
+      let snapshot;
+      
+      const coordinate = {
+        startCoordinate: { x: 0, y: 0 },
+        endCoordinate: { x: 0, y: 0 },
+      };
+
+
+      const handleMouseDown = (e) => {
+        shouldDraw.current = true
+        coordinate.startCoordinate = { x: e.clientX, y: e.clientY };
+        snapshot = context?.getImageData(0,0, canvas.width, canvas.height);
+      }
+
+      const handleMouseMove = (e) => {
+        if (!shouldDraw.current) {
+          return
+        }
+
+        context.putImageData(snapshot, 0, 0)
+        
+        coordinate.endCoordinate = { x: e.clientX, y: e.clientY };
+        const { x: startX, y: startY } = coordinate.startCoordinate;
+        const { x: endX, y: endY } = coordinate.endCoordinate;
+        
+        context.arc(50, 50, 50, 0, 2 * Math.PI)
+      }
+
+      const handleMouseUp = (e) => {
+        shouldDraw.current = false
+
+        drawRectangle({
+          coordinate,
+          canvas,
+        });
+
+        context.arc(50, 50, 50, 0, 2 * Math.PI);
+        context.stroke() 
+
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        drawHistory.current.push(imageData);
+        historyPointer.current = drawHistory.current.length - 1;
+
+      }
+      canvas.addEventListener('mousedown', handleMouseDown)
+      canvas.addEventListener('mousemove', handleMouseMove)
+      canvas.addEventListener('mouseup', handleMouseUp)
+
+      return () => {
+        canvas.removeEventListener('mousedown', handleMouseDown)
+        canvas.removeEventListener('mousemove', handleMouseMove)
+        canvas.removeEventListener('mouseup', handleMouseUp)
+      }
+    }
 
   
   }, [activeMenuItem])
