@@ -1,12 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import cx from 'classnames'
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faEraser, faRotateLeft, faRotateRight, faFileArrowDown, faSquare, faCircle } from '@fortawesome/free-solid-svg-icons'
+import { faPencil, faEraser, faRotateLeft, faRotateRight, faFileArrowDown, faSquare, faCircle, faArrowAltCircleRight, faHeartCircleXmark, faHeartPulse } from '@fortawesome/free-solid-svg-icons'
 
 import { MENU_ITEMS } from '@/constants'
 import styles from './index.module.css'
 import { actionItemClick, menuItemClick } from '@/Redux/slice/menuSlice'
+import { socket } from '@/socket'
 
 
 const Menu = () => {
@@ -14,12 +15,21 @@ const Menu = () => {
     const activeMenuItem = useSelector((state) => state.menu.activeMenuItem)
 
     const handleMenuClick = (itemName) => {
+        console.log(Math.random())
         dispatch(menuItemClick(itemName))
+        socket.emit('menuChange', itemName)
     }
 
     const handleActionClick = (itemName) => {
         dispatch(actionItemClick(itemName))
     }
+
+    useEffect(() => {
+        socket.on('menuChange', (itemName) =>  dispatch(menuItemClick(itemName)))
+        return () => {
+            socket.off('menuChange')
+        }
+    }, [])
     
 
     return (
