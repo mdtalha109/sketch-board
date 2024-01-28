@@ -3,7 +3,9 @@ import { MENU_ITEMS } from '@/constants';
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux';
 import { socket } from '@/socket';
-import { drawRectangle } from '@/utilities/shapes/drawShape';
+import { drawCircle, drawSquare } from '@/utilities/shapes/drawShape';
+import { getSnapShot } from '@/utilities/snapShot';
+
 
 const Board = () => {
   const dispatch = useDispatch()
@@ -109,7 +111,7 @@ const Board = () => {
       const handleMouseUp = (e) => {
   
         shouldDraw.current = false
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const imageData = getSnapShot(canvas);
         drawHistory.current.push(imageData)
         historyPointer.current = drawHistory.current.length - 1
       }
@@ -151,60 +153,44 @@ const Board = () => {
         endCoordinate: { x: 0, y: 0 },
       };
 
-
       const handleMouseDown = (e) => {
         shouldDraw.current = true
         coordinate.startCoordinate = { x: e.clientX, y: e.clientY };
-        snapshot = context?.getImageData(0,0, canvas.width, canvas.height);
+        snapshot = getSnapShot(canvas)
         socket.emit('beginSquare')
       }
 
       const handleMouseMove = (e) => {
+
         if (!shouldDraw.current) {
           return
         }
 
         context.putImageData(snapshot, 0, 0)
-        
         coordinate.endCoordinate = { x: e.clientX, y: e.clientY };
-        const { x: startX, y: startY } = coordinate.startCoordinate;
-        const { x: endX, y: endY } = coordinate.endCoordinate;
-        
-        context.strokeRect(
-          Math.min(startX, endX),
-          Math.min(startY, endY),
-          Math.abs(endX - startX), 
-          Math.abs(endY - startY) 
-        );
-
+        drawSquare(canvas, coordinate)
         socket.emit('drawSquare', coordinate)
       }
 
       const handleMouseUp = (e) => {
         shouldDraw.current = false
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
+        const imageData = getSnapShot(canvas)
         drawHistory.current.push(imageData)
         historyPointer.current = drawHistory.current.length - 1
       }
-      canvas.addEventListener('mousedown', handleMouseDown)
-      canvas.addEventListener('mousemove', handleMouseMove)
-      canvas.addEventListener('mouseup', handleMouseUp)
 
       const handleDrawSquare = (coordinate) => {
         context.putImageData(snapshot, 0, 0)
-        const { x: startX, y: startY } = coordinate.startCoordinate;
-        const { x: endX, y: endY } = coordinate.endCoordinate;
-        context.strokeRect(
-          Math.min(startX, endX),
-          Math.min(startY, endY),
-          Math.abs(endX - startX), 
-          Math.abs(endY - startY) 
-        );
+        drawSquare(canvas, coordinate)
       }
 
       const handleBeginSquare = () => {
-        snapshot = context?.getImageData(0,0, canvas.width, canvas.height);
+        snapshot = getSnapShot(canvas)
       }
+
+      canvas.addEventListener('mousedown', handleMouseDown)
+      canvas.addEventListener('mousemove', handleMouseMove)
+      canvas.addEventListener('mouseup', handleMouseUp)
 
       socket.on('beginSquare', handleBeginSquare)
       socket.on('drawSquare', handleDrawSquare)
@@ -213,12 +199,15 @@ const Board = () => {
         canvas.removeEventListener('mousedown', handleMouseDown)
         canvas.removeEventListener('mousemove', handleMouseMove)
         canvas.removeEventListener('mouseup', handleMouseUp)
+
+        socket.off('beginSquare', handleBeginSquare)
+        socket.off('drawSquare', handleDrawSquare)
     
       }
     }
-    else if(activeMenuItem == 'CIRCLE'){
+    else if (activeMenuItem == 'CIRCLE') {
       let snapshot;
-      
+
       const coordinate = {
         startCoordinate: { x: 0, y: 0 },
         endCoordinate: { x: 0, y: 0 },
@@ -228,7 +217,8 @@ const Board = () => {
       const handleMouseDown = (e) => {
         shouldDraw.current = true
         coordinate.startCoordinate = { x: e.clientX, y: e.clientY };
-        snapshot = context?.getImageData(0,0, canvas.width, canvas.height);
+        snapshot = getSnapShot(canvas)
+        socket.emit('beginCircle')
       }
 
       const handleMouseMove = (e) => {
@@ -237,38 +227,46 @@ const Board = () => {
         }
 
         context.putImageData(snapshot, 0, 0)
-        
         coordinate.endCoordinate = { x: e.clientX, y: e.clientY };
-        const { x: startX, y: startY } = coordinate.startCoordinate;
-        const { x: endX, y: endY } = coordinate.endCoordinate;
-        context.beginPath();
-        const radius = Math.sqrt(
-          Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)
-        );
-        context.arc(startX, startY, radius, 0, 2 * Math.PI)
-        context.stroke() 
+        drawCircle(canvas, coordinate)
+        socket.emit('drawCircle', coordinate)
+        
       }
 
       const handleMouseUp = (e) => {
         shouldDraw.current = false
-
-        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const imageData = getSnapShot(canvas);
         drawHistory.current.push(imageData);
         historyPointer.current = drawHistory.current.length - 1;
-
       }
+
       canvas.addEventListener('mousedown', handleMouseDown)
       canvas.addEventListener('mousemove', handleMouseMove)
       canvas.addEventListener('mouseup', handleMouseUp)
+
+      const handleBeginCircle = () => {
+        snapshot = getSnapShot(canvas)
+      }
+
+      const handleDrawCircle = (coordinate) => {
+        context.putImageData(snapshot, 0, 0)
+        drawCircle(canvas, coordinate)
+      }
+
+      socket.on('beginCircle', handleBeginCircle);
+      socket.on('drawCircle', handleDrawCircle);
+      
 
       return () => {
         canvas.removeEventListener('mousedown', handleMouseDown)
         canvas.removeEventListener('mousemove', handleMouseMove)
         canvas.removeEventListener('mouseup', handleMouseUp)
+
+        socket.off('beginCircle', handleDrawCircle);
+        socket.off('drawCircle', handleDrawCircle);
       }
     }
 
-   
 
   }, [activeMenuItem])
 

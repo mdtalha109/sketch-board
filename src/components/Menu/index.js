@@ -1,13 +1,15 @@
 import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import cx from 'classnames'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faPencil, faEraser, faRotateLeft, faRotateRight, faFileArrowDown, faSquare, faCircle, faArrowAltCircleRight, faHeartCircleXmark, faHeartPulse } from '@fortawesome/free-solid-svg-icons'
+import Tippy from '@tippyjs/react';
 
 import { MENU_ITEMS } from '@/constants'
 import styles from './index.module.css'
 import { actionItemClick, menuItemClick } from '@/Redux/slice/menuSlice'
-import { socket } from '@/socket'
+import { socket } from '@/socket';
+import { LuCircle, LuDownload, LuEraser,  LuPencil, LuRotateCcw, LuRotateCw, LuSquare } from "react-icons/lu";
+
+import 'tippy.js/dist/tippy.css';
 
 
 const Menu = () => {
@@ -25,37 +27,59 @@ const Menu = () => {
     }
 
     useEffect(() => {
-        socket.on('menuChange', (itemName) =>  dispatch(menuItemClick(itemName)))
+        socket.on('menuChange', (itemName) => dispatch(menuItemClick(itemName)))
         return () => {
             socket.off('menuChange')
         }
     }, [])
-    
+
 
     return (
         <div className={styles.menuContainer}>
-            <div className={cx(styles.iconWrapper, {[styles.active]: activeMenuItem === MENU_ITEMS.PENCIL})}>
-                <FontAwesomeIcon icon={faPencil} className={styles.icon} onClick={() => handleMenuClick(MENU_ITEMS.PENCIL)} />
-            </div>
-            <div className={cx(styles.iconWrapper, {[styles.active]: activeMenuItem === MENU_ITEMS.ERASER})}>
-                <FontAwesomeIcon icon={faEraser} className={styles.icon} onClick={() => handleMenuClick(MENU_ITEMS.ERASER)} />
-            </div>
-            <div className={styles.iconWrapper} onClick={()=> {handleActionClick(MENU_ITEMS.UNDO)}}>
-                <FontAwesomeIcon icon={faRotateLeft} className={styles.icon}  />
-            </div>
-            <div className={styles.iconWrapper} onClick={()=> {handleActionClick(MENU_ITEMS.REDO)}}>
-                <FontAwesomeIcon icon={faRotateRight} className={styles.icon}  />
-            </div>
-            <div className={styles.iconWrapper} onClick={()=> {handleActionClick(MENU_ITEMS.DOWNLOAD)}}>
-                <FontAwesomeIcon icon={faFileArrowDown} className={styles.icon} />
-            </div>
-            <div className={styles.iconWrapper} onClick={()=> {handleMenuClick(MENU_ITEMS.SQUARE)}}>
-                <FontAwesomeIcon icon={faSquare} className={styles.icon} />
-            </div>
-            <div className={styles.iconWrapper} onClick={()=> {handleMenuClick(MENU_ITEMS.CIRCLE)}}>
-                <FontAwesomeIcon icon={faCircle} className={styles.icon} />
-            </div>
+
+
+            <Tippy content="Pencil">
+                <div className={cx(styles.iconWrapper, { [styles.active]: activeMenuItem === MENU_ITEMS.PENCIL })}>
+                    <span><LuPencil className={styles.icon} onClick={() => handleMenuClick(MENU_ITEMS.PENCIL)} /></span>
+                </div>
+            </Tippy>
+
+
+            <Tippy content="Eraser">
+                <div className={cx(styles.iconWrapper, { [styles.active]: activeMenuItem === MENU_ITEMS.ERASER })}>
+                    <LuEraser  className={styles.icon} onClick={() => handleMenuClick(MENU_ITEMS.ERASER)} />
+                </div>
+            </Tippy>
+
+            <Tippy content="Undo">
+                <div className={styles.iconWrapper} onClick={() => { handleActionClick(MENU_ITEMS.UNDO) }}>
+                    <LuRotateCcw className={styles.icon} />
+                </div>
+            </Tippy>
+
+            <Tippy content="Redo">
+                <div className={styles.iconWrapper} onClick={() => { handleActionClick(MENU_ITEMS.REDO) }}>
+                    <LuRotateCw  className={styles.icon} />
+                </div>
+            </Tippy>
             
+            <Tippy content="Download">
+                <div className={styles.iconWrapper} onClick={() => { handleActionClick(MENU_ITEMS.DOWNLOAD) }}>
+                    <LuDownload className={styles.icon} />
+                </div>
+            </Tippy>
+
+            <Tippy content="Square">
+                <div className={styles.iconWrapper} onClick={() => { handleMenuClick(MENU_ITEMS.SQUARE) }}>
+                    <LuSquare className={styles.icon} />
+                </div>
+            </Tippy>
+
+            <Tippy content="Circle">
+                <div className={styles.iconWrapper} onClick={() => { handleMenuClick(MENU_ITEMS.CIRCLE) }}>
+                    <LuCircle className={styles.icon} />
+                </div>
+            </Tippy>
         </div>
     )
 }
