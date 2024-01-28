@@ -206,6 +206,7 @@ const Board = () => {
       }
     }
     else if (activeMenuItem == 'CIRCLE') {
+
       let snapshot;
 
       const coordinate = {
@@ -266,7 +267,101 @@ const Board = () => {
         socket.off('drawCircle', handleDrawCircle);
       }
     }
+    else if (activeMenuItem == 'PARALLELOGRAM') {
+      const coordinate = {
+        startCoordinate: { x: 0, y: 0 },
+        endCoordinate: { x: 0, y: 0 },
+      };
+      let snapshot;
+      let isDrawingParallelogram = {current: null};
+      const handleStartParallelogram = (e) => {
+        shouldDraw.current = true;
+        isDrawingParallelogram.current = true;
+        coordinate.startCoordinate = { x: e.clientX, y: e.clientY };
+        snapshot = getSnapShot(canvas);
+        socket.emit('beginParallelogram');
+      };
 
+      const handleMoveParallelogram = (e) => {
+        if (!shouldDraw.current || !isDrawingParallelogram.current) {
+          return;
+        }
+
+        context.putImageData(snapshot, 0, 0);
+        coordinate.endCoordinate = { x: e.clientX, y: e.clientY };
+
+        // Calculate the width and height of the parallelogram
+        const width = coordinate.endCoordinate.x - coordinate.startCoordinate.x;
+        const height = coordinate.endCoordinate.y - coordinate.startCoordinate.y;
+
+        // Draw the parallelogram using a transformation matrix
+        context.beginPath();
+        context.setTransform(
+          1, // Horizontal scaling
+          0, // Horizontal skewing
+          (coordinate.endCoordinate.x - coordinate.startCoordinate.x) / height, // Vertical skewing
+          1, // Vertical scaling
+          coordinate.startCoordinate.x, // Horizontal translation
+          coordinate.startCoordinate.y // Vertical translation
+        );
+        context.rect(0, 0, width, height);
+        context.stroke();
+        context.setTransform(1, 0, 0, 1, 0, 0); // Reset the transformation matrix
+
+        socket.emit('drawParallelogram', coordinate);
+      };
+
+      const handleEndParallelogram = (e) => {
+        shouldDraw.current = false;
+        isDrawingParallelogram.current = false;
+        const imageData = getSnapShot(canvas);
+        drawHistory.current.push(imageData);
+        historyPointer.current = drawHistory.current.length - 1;
+      };
+
+      canvas.addEventListener('mousedown', handleStartParallelogram);
+      canvas.addEventListener('mousemove', handleMoveParallelogram);
+      canvas.addEventListener('mouseup', handleEndParallelogram);
+
+      const handleBeginParallelogram = () => {
+        snapshot = getSnapShot(canvas);
+      };
+
+      const handleDrawParallelogram = (coordinate) => {
+       
+        context.putImageData(snapshot, 0, 0);
+
+        const width = coordinate.endCoordinate.x - coordinate.startCoordinate.x;
+        const height = coordinate.endCoordinate.y - coordinate.startCoordinate.y;
+
+        
+
+        context.beginPath();
+        context.setTransform(
+          1,
+          0,
+          (coordinate.endCoordinate.x - coordinate.startCoordinate.x) / height,
+          1,
+          coordinate.startCoordinate.x,
+          coordinate.startCoordinate.y
+        );
+        context.rect(0, 0, width, height);
+        context.stroke();
+        context.setTransform(1, 0, 0, 1, 0, 0);
+      };
+
+      socket.on('beginParallelogram', handleBeginParallelogram);
+      socket.on('drawParallelogram', handleDrawParallelogram);
+
+      return () => {
+        canvas.removeEventListener('mousedown', handleStartParallelogram);
+        canvas.removeEventListener('mousemove', handleMoveParallelogram);
+        canvas.removeEventListener('mouseup', handleEndParallelogram);
+
+        socket.off('beginParallelogram', handleBeginParallelogram);
+        socket.off('drawParallelogram', handleDrawParallelogram);
+      };
+    }
 
   }, [activeMenuItem])
 
