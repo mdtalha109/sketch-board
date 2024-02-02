@@ -267,6 +267,86 @@ const Board = () => {
         socket.off('drawCircle', handleDrawCircle);
       }
     }
+    else if(activeMenuItem == 'ARROW'){
+      
+     
+      const coordinate = {
+        startCoordinate: { x: 0, y: 0 },
+        endCoordinate: { x: 0, y: 0 },
+      };
+
+      const handleMouseDown = (event) => {
+        shouldDraw.current  = true;
+        coordinate.startCoordinate = {
+          x: event.clientX,
+          y: event.clientY,
+        };
+      };
+
+      const handleMouseMove = (e) => {
+        if (!shouldDraw.current) return;
+
+        coordinate.endCoordinate = { x: e.clientX, y: e.clientY };
+
+        const { x: startX, y: startY } = coordinate.startCoordinate;
+        const { x: endX, y: endY } = coordinate.endCoordinate;
+
+        // context.beginPath();
+        // context.moveTo(startX, startY);
+        // context.lineTo(endX, endY);
+        // context.stroke();
+      };
+
+      const handleMouseUp = () => {
+        shouldDraw.current  = false;
+
+        const { x: startX, y: startY } = coordinate.startCoordinate;
+        const { x: endX, y: endY } = coordinate.endCoordinate;
+
+        // Draw the arrow
+        
+
+        var arrowSize = 10;
+
+        context.moveTo(startX, startY);
+        const angle = Math.atan2(endY - startY, endX - startX);
+
+        context.beginPath();
+        context.moveTo(startX, startY);
+        context.lineTo(endX, endY);
+        context.lineWidth = size;
+        
+        context.stroke();
+
+        const arrowLeftX = endX - arrowSize * Math.cos(angle + Math.PI / 6);
+        const arrowLeftY = endY - arrowSize * Math.sin(angle + Math.PI / 6);
+        const arrowRightX = endX - arrowSize * Math.cos(angle - Math.PI / 6);
+        const arrowRightY = endY - arrowSize * Math.sin(angle - Math.PI / 6);
+
+        // Draw the arrowhead
+        context.beginPath();
+        context.lineWidth = size;
+        
+        context.moveTo(arrowLeftX, arrowLeftY);
+        context.lineTo(endX, endY);
+        context.stroke();
+        context.lineTo(arrowRightX, arrowRightY);
+        context.stroke();
+        context.closePath();
+        
+       
+      };
+
+      canvas.addEventListener("mousedown", handleMouseDown);
+      canvas.addEventListener("mousemove", handleMouseMove);
+      canvas.addEventListener("mouseup", handleMouseUp);
+
+      return () => {
+        canvas.removeEventListener("mousedown", handleMouseDown);
+        canvas.removeEventListener("mousemove", handleMouseMove);
+        canvas.removeEventListener("mouseup", handleMouseUp);
+      };
+  }
     else if (activeMenuItem == 'PARALLELOGRAM') {
       const coordinate = {
         startCoordinate: { x: 0, y: 0 },
