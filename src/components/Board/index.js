@@ -346,7 +346,7 @@ const Board = () => {
         canvas.removeEventListener("mousemove", handleMouseMove);
         canvas.removeEventListener("mouseup", handleMouseUp);
       };
-  }
+    }
     else if (activeMenuItem == 'PARALLELOGRAM') {
       const coordinate = {
         startCoordinate: { x: 0, y: 0 },
@@ -440,6 +440,68 @@ const Board = () => {
 
         socket.off('beginParallelogram', handleBeginParallelogram);
         socket.off('drawParallelogram', handleDrawParallelogram);
+      };
+    }
+    else if (activeMenuItem == 'HEXAGON') {
+      let snapshot;
+      
+      const coordinate = {
+        center: { x: 0, y: 0 },
+        radius: 0,
+      };
+    
+      const handleMouseDown = (e) => {
+        shouldDraw.current = true;
+        coordinate.center = { x: e.clientX, y: e.clientY };
+        snapshot = context?.getImageData(0, 0, canvas.width, canvas.height);
+      };
+    
+      const handleMouseMove = (e) => {
+        if (!shouldDraw.current) {
+          return;
+        }
+    
+        context.putImageData(snapshot, 0, 0);
+        
+        coordinate.radius = Math.sqrt(
+          Math.pow(e.clientX - coordinate.center.x, 2) + 
+          Math.pow(e.clientY - coordinate.center.y, 2)
+        );
+    
+        // Draw the hexagon based on center and radius
+        drawHexagon(context, coordinate.center.x, coordinate.center.y, coordinate.radius);
+      };
+    
+      const handleMouseUp = () => {
+        shouldDraw.current = false;
+    
+        // Save the hexagon drawing state if needed
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        drawHistory.current.push(imageData);
+        historyPointer.current = drawHistory.current.length - 1;
+      };
+    
+      const drawHexagon = (ctx, x, y, radius) => {
+        const sides = 6;
+        ctx.beginPath();
+        for (let i = 0; i < sides; i++) {
+          const angle = (i * 2 * Math.PI) / sides;
+          const newX = x + radius * Math.cos(angle);
+          const newY = y + radius * Math.sin(angle);
+          ctx.lineTo(newX, newY);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      };
+    
+      canvas.addEventListener('mousedown', handleMouseDown);
+      canvas.addEventListener('mousemove', handleMouseMove);
+      canvas.addEventListener('mouseup', handleMouseUp);
+    
+      return () => {
+        canvas.removeEventListener('mousedown', handleMouseDown);
+        canvas.removeEventListener('mousemove', handleMouseMove);
+        canvas.removeEventListener('mouseup', handleMouseUp);
       };
     }
 
