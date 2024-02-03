@@ -12,8 +12,8 @@ import { socket } from '@/socket';
 const Toolbox = () => {
     const dispatch = useDispatch()
     const activeMenuItem = useSelector((state) => state.menu.activeMenuItem)
-    const showStrokeToolOption = activeMenuItem === MENU_ITEMS.PENCIL
-    const showBrushToolOption = activeMenuItem === MENU_ITEMS.PENCIL || activeMenuItem === MENU_ITEMS.ERASER
+    const showStrokeToolOption = activeMenuItem === MENU_ITEMS.PENCIL || MENU_ITEMS.SQUARE || MENU_ITEMS.CIRCLE
+    const showBrushToolOption = activeMenuItem === MENU_ITEMS.PENCIL || activeMenuItem === MENU_ITEMS.ERASER || activeMenuItem === MENU_ITEMS.SQUARE || activeMenuItem === MENU_ITEMS.CIRCLE || activeMenuItem === MENU_ITEMS.ARROW || activeMenuItem === MENU_ITEMS.HEXAGON || activeMenuItem === MENU_ITEMS.PARALLELOGRAM 
     const {color, size} = useSelector((state) => state.toolbox[activeMenuItem])
 
     const updateBrushSize = (e) => {
