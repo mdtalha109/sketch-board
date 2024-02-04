@@ -1,7 +1,8 @@
 .toolboxContainer {
-    @apply p-5 absolute top-1/4 left-5 w-64 rounded-md;
+    @apply flex p-5 absolute w-1/4  left-1/2 bottom-10 gap-10 justify-between rounded-md z-10;
     box-shadow: theme('colors.shadow1');
     border: 1px solid theme('colors.border1');
+    transform: translateX(-50%);
     background-color: theme('colors.background1');
 
     .toolItem {
@@ -16,7 +17,7 @@
             @apply flex justify-between mt-2;
 
             .colorBox {
-                @apply h-5 w-5 mr-1 rounded-sm cursor-pointer;
+                @apply h-5 w-5 mr-1 cursor-pointer rounded-xl;
 
                 &:hover, &.active {
                     border: 1.5px solid theme('colors.border2');
