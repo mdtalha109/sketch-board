@@ -13,6 +13,12 @@ const initialState = {
     [MENU_ITEMS.UNDO]: {},
     [MENU_ITEMS.REDO]: {},
     [MENU_ITEMS.DOWNLOAD]: {},
+    [MENU_ITEMS.SQUARE]: {},
+    [MENU_ITEMS.CIRCLE]: {},
+    [MENU_ITEMS.ARROW]: {},
+    [MENU_ITEMS.HEXAGON]: {},
+    [MENU_ITEMS.HEART]: {},
+    [MENU_ITEMS.PARALLELOGRAM]: {}
 }
 
 export const toolboxSlice = createSlice({
