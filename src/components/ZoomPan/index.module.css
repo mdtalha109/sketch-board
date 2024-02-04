@@ -1,0 +1,16 @@
+.container {
+    @apply flex absolute right-10 bottom-10 rounded-md;
+    border: 1px solid theme('colors.border1');
+    
+    box-shadow: theme('colors.shadow1');
+    background-color: theme('colors.background1');
+  }
+
+.containerItem{
+    @apply px-4 py-2 hover:cursor-pointer;
+
+    &:hover, &.active {
+      background-color: theme('colors.text2');
+    }
+
+}
